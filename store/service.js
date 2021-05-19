@@ -1,10 +1,10 @@
 import _ from 'lodash'
-// import localforage from 'localforage'
+import localforage from 'localforage'
 
-// const ServiceTable = localforage.createInstance({
-//   name: 'ZleceniaApp',
-//   storeName: 'services',
-// })
+const ServiceTable = localforage.createInstance({
+  name: 'ZleceniaApp',
+  storeName: 'services',
+})
 
 export const state = () => ({
   services: [],
@@ -12,7 +12,7 @@ export const state = () => ({
 
 export const mutations = {
   update(state, Service) {
-    window.ServiceTable.setItem(String(Service.id), Service)
+    ServiceTable.setItem(String(Service.id), Service)
     state.services = _.filter(
       state.services,
       (service) => service.id !== String(Service.id)
@@ -21,10 +21,18 @@ export const mutations = {
   },
 
   remove(state, id) {
-    window.ServiceTable.removeItem(id)
+    ServiceTable.removeItem(id)
     state.services = _.filter(
       state.services,
       (service) => service.id !== String(id)
     )
+  },
+}
+
+export const actions = {
+  init({ commit }) {
+    ServiceTable.iterate((service) => {
+      commit('update', service)
+    })
   },
 }
