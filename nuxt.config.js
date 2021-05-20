@@ -24,10 +24,18 @@ export default {
       nativeUI: true,
     },
     manifest: {
-      name: 'My Awesome App',
-      short_name: 'My Awesome App',
+      name: 'ZleceniaApp',
+      short_name: 'ZleceniaApp',
+      description: 'ZleceniaApp',
       lang: 'pl',
     },
+    icon: {
+      purpose: 'any',
+    },
+  },
+
+  axios: {
+    browserBaseURL: 'https://localhost/api',
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
@@ -47,7 +55,7 @@ export default {
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
-  modules: ['bootstrap-vue/nuxt'],
+  modules: ['bootstrap-vue/nuxt', '@nuxtjs/axios'],
 
   bootstrapVue: {
     icons: true,

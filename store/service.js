@@ -8,6 +8,7 @@ const ServiceTable = localforage.createInstance({
 
 export const state = () => ({
   services: [],
+  timetables: [],
 })
 
 export const mutations = {
@@ -27,12 +28,32 @@ export const mutations = {
       (service) => service.id !== String(id)
     )
   },
+
+  clear(state) {
+    state.services = []
+  },
 }
 
 export const actions = {
-  init({ commit }) {
-    ServiceTable.iterate((service) => {
+  async init({ commit }) {
+    await ServiceTable.iterate((service) => {
       commit('update', service)
     })
+  },
+
+  async fetchTimetable({ commit }, { date = null, userId = null }) {
+    const res = await this.$axios.post('/zlecenia/get-from-terminarz', {
+      api_token: localStorage.getItem('api_token'),
+      date_string: date,
+      technik_id: userId,
+    })
+    for (const termin of res.data.terminy) {
+      console.log(termin)
+    }
+  },
+
+  async clear({ commit }) {
+    await ServiceTable.clear()
+    commit('clear')
   },
 }
