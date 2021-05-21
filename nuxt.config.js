@@ -35,7 +35,7 @@ export default {
   },
 
   axios: {
-    browserBaseURL: 'https://localhost/api',
+    browserBaseURL: process.env.API_BASE_URL,
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
@@ -52,6 +52,7 @@ export default {
     // https://go.nuxtjs.dev/eslint
     '@nuxtjs/eslint-module',
     '@nuxtjs/pwa',
+    '@nuxtjs/dotenv',
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules

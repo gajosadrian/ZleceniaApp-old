@@ -1,19 +1,35 @@
 <template>
   <b-container>
-    <h1 class="title">zlecenia-app</h1>
+    <h1>ZleceniaApp</h1>
     <div v-if="$nuxt.isOffline">Jesteś offline</div>
-    <ul>
-      <li v-for="service in services" :key="service.id">
-        {{ service.no }} <span class="text-muted">#{{ service.id }}</span>
-      </li>
-    </ul>
-    <b-button @click="addService()">add service</b-button>
-    <b-button @click="loginUser('ag', 'haslo')">login user</b-button>
-    <b-button @click="fetchZlecenia()">fetch zlecenia</b-button>
-    <b-button @click="$store.dispatch('service/clear')">
-      clear zlecenia
-    </b-button>
-    user: {{ user }}
+    <b-card v-if="!user" title="Logowanie">
+      <b-form-group>
+        <b-input v-model="auth.email" placeholder="Login" type="text" />
+      </b-form-group>
+      <b-form-group>
+        <b-input v-model="auth.password" placeholder="Hasło" type="password" />
+      </b-form-group>
+      <b-button @click="loginUser('ag', 'haslo')">Zaloguj</b-button>
+    </b-card>
+    <b-card v-else class="mt-2">
+      <div>
+        Zalogowany:
+        <span class="font-weight-bold">{{ user ? user.name : '' }}</span>
+      </div>
+    </b-card>
+    <b-card class="mt-2" title="Zlecenia">
+      <b-form-group>
+        <b-button @click="fetchZlecenia()">pobierz zlecenia</b-button>
+        <b-button @click="$store.dispatch('service/clear')">
+          clear zlecenia
+        </b-button>
+      </b-form-group>
+      <ul>
+        <li v-for="zlecenie in services" :key="zlecenie.id">
+          {{ zlecenie.nr }} <span class="text-muted">#{{ zlecenie.id }}</span>
+        </li>
+      </ul>
+    </b-card>
   </b-container>
 </template>
 
@@ -21,6 +37,10 @@
 export default {
   data() {
     return {
+      auth: {
+        email: '',
+        password: '',
+      },
       user: null,
     }
   },
@@ -30,33 +50,16 @@ export default {
     },
   },
   methods: {
-    addService() {
-      const id = Math.floor(Math.random() * (1000 - 1)) + 1
-      this.$store.commit('service/update', {
-        id,
-        no: this.randomString(10),
-      })
-    },
-    randomString(len) {
-      const charSet =
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-      let randomString = ''
-      for (let i = 0; i < len; i++) {
-        const randomPoz = Math.floor(Math.random() * charSet.length)
-        randomString += charSet.substring(randomPoz, randomPoz + 1)
-      }
-      return randomString
-    },
-    async loginUser(email, password) {
+    async loginUser() {
       const data = await this.$axios.$post('/login-api', {
-        email,
-        password,
+        email: this.auth.email,
+        password: this.auth.password,
       })
       this.user = data.user
       localStorage.setItem('api_token', data.api_token)
     },
     async fetchZlecenia() {
-      await this.$store.dispatch('service/fetchTimetable', {
+      await this.$store.dispatch('service/fetchServices', {
         userId: 2,
       })
     },
