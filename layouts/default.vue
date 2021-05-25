@@ -4,6 +4,7 @@
       toggleable="lg"
       type="dark"
       fixed="top"
+      sticky
       :variant="$nuxt.isOffline ? 'danger' : 'primary'"
     >
       <b-navbar-brand href="#">
@@ -14,13 +15,14 @@
 
       <b-collapse id="nav-collapse" is-nav>
         <b-navbar-nav>
-          <b-nav-item href="#">Zlecenia</b-nav-item>
+          <NuxtLink :to="{ name: 'services' }" tag="b-nav-item">
+            Zlecenia
+          </NuxtLink>
         </b-navbar-nav>
 
         <b-navbar-nav class="ml-auto">
-          <b-nav-item-dropdown text="User" right>
-            <b-dropdown-item href="#">Profile</b-dropdown-item>
-            <b-dropdown-item href="#">Sign Out</b-dropdown-item>
+          <b-nav-item-dropdown v-if="user" :text="user.short_name" right>
+            <b-dropdown-item @click="logoutUser()">Wyloguj</b-dropdown-item>
           </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-collapse>
@@ -29,3 +31,19 @@
     <Nuxt />
   </div>
 </template>
+
+<script>
+export default {
+  computed: {
+    user() {
+      return this.$store.state.user.user
+    },
+  },
+
+  methods: {
+    logoutUser() {
+      this.$store.dispatch('user/clear')
+    },
+  },
+}
+</script>

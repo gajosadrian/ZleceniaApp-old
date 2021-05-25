@@ -1,8 +1,5 @@
 <template>
   <b-container>
-    <h3 class="mt-2">Zlecenia</h3>
-    <hr />
-
     <b-card v-if="!user" title="Logowanie">
       <b-form-group>
         <b-input v-model="auth.email" placeholder="Login" type="text" />
@@ -30,33 +27,6 @@
         clear zlecenia
       </b-button>
     </b-card>
-
-    <div v-for="(zlecenie, key) in zlecenia" :key="zlecenie.id">
-      <div class="d-flex justify-content-between">
-        <div>
-          <div class="text-muted">
-            <small>{{ zlecenie.znacznik_formatted }}</small>
-          </div>
-          <div v-if="zlecenie.klient" class="font-weight-bold">
-            {{ zlecenie.klient.nazwa }}
-          </div>
-          <div v-if="zlecenie.urzadzenie">
-            <div>{{ zlecenie.urzadzenie.nazwa }}</div>
-            <div>{{ zlecenie.urzadzenie.producent }}</div>
-          </div>
-          <div class="text-muted">
-            <small v-if="key === 0">✔️ Zrealizowane</small>
-            <small v-else-if="key === 1">⏲️ Oczekujące...</small>
-            <small v-else-if="key === 2">❌ Nieumówione</small>
-            <small v-else>⏲️ Oczekujące...</small>
-          </div>
-        </div>
-        <div>
-          <b-button variant="light" size="sm">🗺️</b-button>
-        </div>
-      </div>
-      <hr />
-    </div>
   </b-container>
 </template>
 
@@ -71,9 +41,6 @@ export default {
     }
   },
   computed: {
-    zlecenia() {
-      return this.$store.state.service.services
-    },
     user() {
       return this.$store.state.user.user
     },

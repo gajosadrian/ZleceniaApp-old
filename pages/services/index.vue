@@ -1,0 +1,200 @@
+<template>
+  <b-container>
+    <div class="d-flex justify-content-between mt-3">
+      <div>
+        <h3>Zlecenia</h3>
+      </div>
+      <div>
+        <b-input v-model="timetableDate" type="date" />
+      </div>
+    </div>
+    <hr />
+
+    <div v-for="termin in terminy" :key="termin.id">
+      <div class="d-flex justify-content-between">
+        <div class="w-100" @click="onTerminClick(termin)">
+          <div v-if="termin.zlecenie" class="text-muted">
+            <small>{{ termin.zlecenie.znacznik_formatted }}</small>
+          </div>
+          <div v-if="termin.klient">
+            <div class="font-weight-bold">{{ termin.klient.nazwa }}</div>
+            <div>{{ termin.klient.adres }}</div>
+            <div>
+              {{ termin.klient.kod_pocztowy }}
+              {{ termin.klient.miasto_short }}
+            </div>
+          </div>
+          <div class="text-muted">
+            <b-badge
+              v-if="termin.zlecenie && termin.zlecenie.is_warsztat"
+              variant="warning"
+            >
+              <b-icon icon="house-door-fill" />
+              Warsztat
+            </b-badge>
+            <b-badge
+              v-else-if="termin.zlecenie && termin.zlecenie.is_soft_zakonczone"
+              variant="success"
+            >
+              <b-icon icon="check2" />
+              Zrealizowane
+            </b-badge>
+            <b-badge
+              v-else-if="termin.zlecenie && !termin.zlecenie.is_umowiono"
+              variant="danger"
+            >
+              <b-icon icon="clock-fill" /> Nieumówione
+            </b-badge>
+            <b-badge
+              v-else-if="termin.zlecenie && !termin.zlecenie.is_soft_zakonczone"
+              variant="secondary"
+            >
+              <b-icon icon="clock-fill" />
+              {{ termin.godzina_rozpoczecia }} -
+              {{ termin.przeznaczony_czas_formatted }}
+            </b-badge>
+            <b-badge v-else variant="success">
+              <b-icon icon="x" />
+              Termin usunięty
+            </b-badge>
+          </div>
+          <div v-if="termin.zlecenie">
+            <div v-if="termin.zlecenie.urzadzenie.id" class="text-right">
+              <div>
+                {{
+                  _.truncate(termin.zlecenie.urzadzenie.nazwa, { length: 20 })
+                }},
+                {{ termin.zlecenie.urzadzenie.producent }}
+              </div>
+              <div>
+                {{
+                  _.truncate(termin.zlecenie.urzadzenie.model, { length: 25 })
+                }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div>
+            <b-button
+              v-if="termin.zlecenie && termin.zlecenie.is_warsztat"
+              variant="warning"
+              disabled
+            >
+              <b-icon icon="cursor-fill" />
+            </b-button>
+            <b-button
+              v-else-if="termin.zlecenie && !termin.zlecenie.is_soft_zakonczone"
+              :variant="
+                termin.zlecenie.is_umowiono ? 'primary' : 'outline-primary'
+              "
+            >
+              <b-icon icon="cursor-fill" />
+            </b-button>
+            <b-button
+              v-else-if="termin.zlecenie && termin.zlecenie.is_soft_zakonczone"
+              variant="success"
+              disabled
+            >
+              <b-icon icon="check2" />
+            </b-button>
+            <b-button v-else variant="secondary" disabled>
+              <b-icon icon="x" />
+            </b-button>
+          </div>
+          <div class="mt-2">
+            <b-button
+              v-if="termin.zlecenie && !termin.zlecenie.is_umowiono"
+              variant="success"
+            >
+              <b-icon icon="telephone-fill" />
+            </b-button>
+          </div>
+        </div>
+      </div>
+      <hr />
+    </div>
+  </b-container>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      timetableIds: [],
+      timetableUserId: 0,
+      timetableDate: this.$route.query.date || '',
+    }
+  },
+
+  computed: {
+    terminy() {
+      const array = []
+      for (const terminId of this.timetableIds) {
+        const termin = this.$store.state.service.timetables[terminId]
+        termin.zlecenie = this.$store.state.service.services[termin.zlecenie_id]
+        array.push(termin)
+      }
+      return array
+    },
+
+    user() {
+      return this.$store.state.user.user
+    },
+
+    // timetableIds() {
+    //   return (
+    //     this.$store.state.service.timetableIds[
+    //       `${this.timetableUserId}#${this.timetableDate}`
+    //     ] || []
+    //   )
+    // },
+  },
+
+  watch: {
+    timetableDate(date) {
+      if (!date) return
+      this.$router.replace({
+        name: 'services',
+        query: { date },
+      })
+      this.getTimetableIds()
+      this.$store.dispatch('service/fetchServices', { date }).then(() => {
+        this.getTimetableIds()
+      })
+    },
+  },
+
+  created() {
+    this.timetableUserId = this.user.technik_id || 2
+    if (!this.timetableDate) {
+      const now = new Date()
+      const yyyy = now.getFullYear()
+      const mm = ('0' + (now.getMonth() + 1)).slice(-2)
+      const dd = ('0' + now.getDate()).slice(-2)
+      this.timetableDate = `${yyyy}-${mm}-${dd}`
+    }
+    this.getTimetableIds()
+  },
+
+  methods: {
+    onTerminClick(termin) {
+      const zlecenie = termin.zlecenie
+      if (zlecenie) {
+        window.navigator.vibrate(20)
+        this.$router.push({
+          name: 'services-id',
+          params: { id: zlecenie.id },
+        })
+      }
+    },
+
+    getTimetableIds() {
+      this.timetableIds =
+        this.$store.state.service.timetableIds[
+          `${this.timetableUserId}#${this.timetableDate}`
+        ] || []
+    },
+  },
+}
+</script>

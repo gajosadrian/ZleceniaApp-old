@@ -25,6 +25,8 @@ export const mutations = {
   clear(state) {
     localStorage.removeItem('api_token')
     localStorage.removeItem('user')
+    state.apiToken = null
+    state.user = null
   },
 }
 
@@ -52,8 +54,10 @@ export const actions = {
   },
 
   async fetchUser({ commit }) {
+    const apiToken = localStorage.getItem('api_token')
+    if (!apiToken) return
     const data = await this.$axios.$post('/user', {
-      api_token: localStorage.getItem('api_token'),
+      api_token: apiToken,
     })
     commit('setUser', data.user)
   },
