@@ -3,6 +3,7 @@
     <b-navbar
       toggleable="lg"
       type="dark"
+      fixed="top"
       :variant="$nuxt.isOffline ? 'danger' : 'primary'"
     >
       <b-navbar-brand href="#">
