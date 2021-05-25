@@ -1,8 +1,12 @@
 <template>
   <div>
-    <b-navbar toggleable="lg" type="dark" variant="info">
-      <b-navbar-brand v-if="$nuxt.isOffline" href="#">
-        Jesteś offline
+    <b-navbar
+      toggleable="lg"
+      type="dark"
+      :variant="$nuxt.isOffline ? 'danger' : 'primary'"
+    >
+      <b-navbar-brand href="#">
+        <span v-if="$nuxt.isOffline">Jesteś offline</span>
       </b-navbar-brand>
 
       <b-navbar-toggle target="nav-collapse" />
