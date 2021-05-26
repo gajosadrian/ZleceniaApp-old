@@ -45,6 +45,7 @@ export default {
   plugins: [
     '~/plugins/init-app.js',
     '~/plugins/lodash.js',
+    '~/plugins/clipboard.js',
     '~/plugins/sounds.js',
   ],
 

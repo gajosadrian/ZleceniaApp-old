@@ -131,7 +131,7 @@
                   : 'btn btn-primary'
               "
             >
-              <b-icon icon="cursor-fill" />
+              <b-icon icon="geo-alt-fill" />
             </b-link>
             <b-button
               v-else-if="termin.zlecenie && termin.zlecenie.is_soft_zakonczone"
