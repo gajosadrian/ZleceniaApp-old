@@ -1,17 +1,19 @@
 <template>
   <b-container>
-    <div class="d-flex justify-content-between mt-3">
-      <div>
-        <h3>Zlecenia: {{ user.technik.nazwa }}</h3>
+    <div class="mt-2">
+      <h4>Zlecenia: {{ user.technik.nazwa }}</h4>
+      <div class="d-flex justify-content-between">
         <div>
-          <b-button variant="primary" size="sm" @click="fetchServices()">
-            <b-icon icon="arrow-clockwise" />
-            Synchronizuj listę
-          </b-button>
+          <div>
+            <b-button variant="light" @click="fetchServices()">
+              <b-icon icon="arrow-clockwise" />
+              Synchronizuj listę
+            </b-button>
+          </div>
         </div>
-      </div>
-      <div>
-        <b-input v-model="timetableDate" type="date" />
+        <div>
+          <b-input v-model="timetableDate" type="date" />
+        </div>
       </div>
     </div>
     <hr />
@@ -19,7 +21,7 @@
     <div v-for="termin in terminy" :key="termin.id">
       <div v-if="termin.klient" class="d-flex justify-content-between">
         <div class="w-100" @click="onTerminClick(termin)">
-          <div v-if="termin.zlecenie">
+          <div v-if="termin.zlecenie && !termin.zlecenie.is_do_wyjasnienia">
             <b-badge variant="light">
               <b-icon icon="clock-fill" />
               {{ termin.godzina_rozpoczecia }} -
@@ -36,7 +38,14 @@
           </div>
           <div class="text-muted">
             <b-badge
-              v-if="termin.zlecenie && termin.zlecenie.is_warsztat"
+              v-if="termin.zlecenie && termin.zlecenie.is_do_wyjasnienia"
+              variant="danger"
+            >
+              <b-icon icon="exclamation-triangle-fill" />
+              Do wyjaśnienia
+            </b-badge>
+            <b-badge
+              v-else-if="termin.zlecenie && termin.zlecenie.is_warsztat"
               variant="warning"
             >
               <b-icon icon="house-door-fill" />
@@ -94,22 +103,30 @@
         <div>
           <div>
             <b-button
-              v-if="termin.zlecenie && termin.zlecenie.is_warsztat"
+              v-if="termin.zlecenie && termin.zlecenie.is_do_wyjasnienia"
+              variant="danger"
+              disabled
+            >
+              <b-icon icon="exclamation-triangle-fill" />
+            </b-button>
+            <b-button
+              v-else-if="termin.zlecenie && termin.zlecenie.is_warsztat"
               variant="warning"
               disabled
             >
               <b-icon icon="house-door-fill" />
             </b-button>
-            <b-button
+            <b-link
               v-else-if="termin.zlecenie && !termin.zlecenie.is_soft_zakonczone"
-              :variant="
+              :href="`intent://q=${termin.klient.adres_search}/#Intent;package=pl.aqurat.automapa;scheme=geo;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end`"
+              :class="
                 !termin.zlecenie.is_umowiono || termin.zlecenie.is_dzwonic
-                  ? 'outline-primary'
-                  : 'primary'
+                  ? 'btn btn-outline-primary'
+                  : 'btn btn-primary'
               "
             >
               <b-icon icon="cursor-fill" />
-            </b-button>
+            </b-link>
             <b-button
               v-else-if="termin.zlecenie && termin.zlecenie.is_soft_zakonczone"
               variant="success"
@@ -122,18 +139,20 @@
             </b-button>
           </div>
           <div class="mt-2">
-            <b-button
+            <b-link
               v-if="
                 termin.zlecenie &&
                 ((!termin.zlecenie.is_soft_zakonczone &&
+                  !termin.zlecenie.is_do_wyjasnienia &&
                   !termin.zlecenie.is_umowiono &&
                   !termin.zlecenie.is_warsztat) ||
                   termin.zlecenie.is_dzwonic)
               "
-              variant="success"
+              :href="`tel:${termin.klient.telefon}`"
+              class="btn btn-success"
             >
               <b-icon icon="telephone-fill" />
-            </b-button>
+            </b-link>
           </div>
         </div>
       </div>
@@ -210,7 +229,7 @@ export default {
     onTerminClick(termin) {
       const zlecenie = termin.zlecenie
       if (zlecenie) {
-        window.navigator.vibrate(20)
+        // window.navigator.vibrate(20)
         this.clickSound.play()
         this.$router.push({
           name: 'services-id',
