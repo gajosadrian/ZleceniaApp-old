@@ -81,6 +81,27 @@ export const actions = {
       date_string: date,
       technik_id: userId,
     })
+    if (res.status === 200) {
+      window.$nuxt.$bvToast.toast('Zaktualizowano listę', {
+        title: 'Zlecenia',
+        toaster: 'b-toaster-bottom-full',
+        variant: 'success',
+        solid: true,
+        noHoverPause: true,
+        noCloseButton: true,
+        autoHideDelay: 2000,
+      })
+    } else {
+      window.$nuxt.$bvToast.toast('Nie udało się zaktualizować listy', {
+        title: 'Zlecenia',
+        toaster: 'b-toaster-bottom-full',
+        variant: 'danger',
+        solid: true,
+        noHoverPause: true,
+        noCloseButton: true,
+        autoHideDelay: 2000,
+      })
+    }
     const data = res.data
     for (const termin of data.terminy) {
       commit('updateTimetable', { timetable: termin })

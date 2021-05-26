@@ -5,14 +5,14 @@
       <div class="d-flex justify-content-between">
         <div>
           <div>
-            <b-button variant="light" @click="fetchServices()">
+            <b-button variant="light" class="border" @click="fetchServices()">
               <b-icon icon="arrow-clockwise" />
               Synchronizuj listę
             </b-button>
           </div>
         </div>
         <div>
-          <b-input v-model="timetableDate" type="date" />
+          <b-input v-model="timetableDate" type="date" class="bg-light" />
         </div>
       </div>
     </div>
@@ -20,12 +20,18 @@
 
     <div v-for="termin in terminy" :key="termin.id">
       <div v-if="termin.klient" class="d-flex justify-content-between">
-        <div class="w-100" @click="onTerminClick(termin)">
-          <div v-if="termin.zlecenie && !termin.zlecenie.is_do_wyjasnienia">
-            <b-badge variant="light">
+        <div class="w-100 pr-2" @click="onTerminClick(termin)">
+          <div>
+            <b-badge
+              v-if="!termin.zlecenie || !termin.zlecenie.is_do_wyjasnienia"
+              variant="light"
+            >
               <b-icon icon="clock-fill" />
               {{ termin.godzina_rozpoczecia }} -
               {{ termin.przeznaczony_czas_formatted }}
+            </b-badge>
+            <b-badge v-if="termin.zlecenie" variant="light">
+              {{ termin.zlecenie.znacznik_formatted }}
             </b-badge>
           </div>
           <div v-if="termin.klient">
@@ -39,14 +45,14 @@
           <div class="text-muted">
             <b-badge
               v-if="termin.zlecenie && termin.zlecenie.is_do_wyjasnienia"
-              variant="danger"
+              class="border border-danger bg-transparent text-danger"
             >
               <b-icon icon="exclamation-triangle-fill" />
               Do wyjaśnienia
             </b-badge>
             <b-badge
               v-else-if="termin.zlecenie && termin.zlecenie.is_warsztat"
-              variant="warning"
+              variant="light"
             >
               <b-icon icon="house-door-fill" />
               Warsztat
@@ -100,7 +106,7 @@
             </div>
           </div>
         </div>
-        <div>
+        <div class="border-left pl-2">
           <div>
             <b-button
               v-if="termin.zlecenie && termin.zlecenie.is_do_wyjasnienia"
@@ -134,7 +140,7 @@
             >
               <b-icon icon="check2" />
             </b-button>
-            <b-button v-else variant="secondary" disabled>
+            <b-button v-else variant="success" disabled>
               <b-icon icon="x" />
             </b-button>
           </div>
@@ -157,13 +163,19 @@
         </div>
       </div>
       <div v-else>
-        <b-alert variant="info" show>
+        <b-alert variant="info" class="p-2" show>
           <div>
             <b-badge variant="info">
               <b-icon icon="clock-fill" />
               {{ termin.godzina_rozpoczecia }} -
               {{ termin.przeznaczony_czas_formatted }}
             </b-badge>
+          </div>
+          <div v-if="termin.zlecenie" class="font-weight-bold mt-2">
+            <div>{{ termin.zlecenie.adres }}</div>
+            <div>
+              {{ termin.zlecenie.kod_pocztowy }} {{ termin.zlecenie.miasto }}
+            </div>
           </div>
           <div class="mt-2">
             {{ termin.temat }}
