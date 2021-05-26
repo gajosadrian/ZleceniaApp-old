@@ -42,7 +42,11 @@ export default {
   css: [],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: ['~/plugins/init-app.js', '~/plugins/lodash.js'],
+  plugins: [
+    '~/plugins/init-app.js',
+    '~/plugins/lodash.js',
+    '~/plugins/sounds.js',
+  ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,

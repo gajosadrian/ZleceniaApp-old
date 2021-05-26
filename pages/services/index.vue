@@ -166,7 +166,7 @@ export default {
   },
 
   created() {
-    this.timetableUserId = this.user.technik_id || 2
+    this.timetableUserId = this.user.technik_id
     if (!this.timetableDate) {
       const now = new Date()
       const yyyy = now.getFullYear()
@@ -182,6 +182,7 @@ export default {
       const zlecenie = termin.zlecenie
       if (zlecenie) {
         window.navigator.vibrate(20)
+        this.clickSound.play()
         this.$router.push({
           name: 'services-id',
           params: { id: zlecenie.id },

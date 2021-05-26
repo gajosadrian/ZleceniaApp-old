@@ -79,7 +79,7 @@ export const actions = {
     const res = await this.$axios.post('/zlecenia/get-from-terminarz', {
       api_token: apiToken,
       date_string: date,
-      technik_id: userId || 2,
+      technik_id: userId,
     })
     const data = res.data
     for (const termin of data.terminy) {
