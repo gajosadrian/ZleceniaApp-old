@@ -21,7 +21,3 @@ window.addEventListener('popstate', function (e) {
     backSound.play()
   }
 })
-
-Notification.requestPermission().then((result) => {
-  console.log(result)
-})

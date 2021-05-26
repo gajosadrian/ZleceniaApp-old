@@ -2,7 +2,13 @@
   <b-container>
     <div class="d-flex justify-content-between mt-3">
       <div>
-        <h3>Zlecenia</h3>
+        <h3>Zlecenia: {{ user.technik.nazwa }}</h3>
+        <div>
+          <b-button variant="primary" size="sm" @click="fetchServices()">
+            <b-icon icon="arrow-clockwise" />
+            Synchronizuj listę
+          </b-button>
+        </div>
       </div>
       <div>
         <b-input v-model="timetableDate" type="date" />
@@ -11,10 +17,14 @@
     <hr />
 
     <div v-for="termin in terminy" :key="termin.id">
-      <div class="d-flex justify-content-between">
+      <div v-if="termin.klient" class="d-flex justify-content-between">
         <div class="w-100" @click="onTerminClick(termin)">
-          <div v-if="termin.zlecenie" class="text-muted">
-            <small>{{ termin.zlecenie.znacznik_formatted }}</small>
+          <div v-if="termin.zlecenie">
+            <b-badge variant="light">
+              <b-icon icon="clock-fill" />
+              {{ termin.godzina_rozpoczecia }} -
+              {{ termin.przeznaczony_czas_formatted }}
+            </b-badge>
           </div>
           <div v-if="termin.klient">
             <div class="font-weight-bold">{{ termin.klient.nazwa }}</div>
@@ -43,15 +53,22 @@
               v-else-if="termin.zlecenie && !termin.zlecenie.is_umowiono"
               variant="danger"
             >
-              <b-icon icon="clock-fill" /> Nieumówione
+              <b-icon icon="clock-fill" />
+              Nieumówione
+            </b-badge>
+            <b-badge
+              v-else-if="termin.zlecenie && termin.zlecenie.is_dzwonic"
+              variant="primary"
+            >
+              <b-icon icon="clock-fill" />
+              Dzwonić wcześniej
             </b-badge>
             <b-badge
               v-else-if="termin.zlecenie && !termin.zlecenie.is_soft_zakonczone"
-              variant="secondary"
+              variant="light"
             >
               <b-icon icon="clock-fill" />
-              {{ termin.godzina_rozpoczecia }} -
-              {{ termin.przeznaczony_czas_formatted }}
+              Oczekujące...
             </b-badge>
             <b-badge v-else variant="success">
               <b-icon icon="x" />
@@ -81,12 +98,14 @@
               variant="warning"
               disabled
             >
-              <b-icon icon="cursor-fill" />
+              <b-icon icon="house-door-fill" />
             </b-button>
             <b-button
               v-else-if="termin.zlecenie && !termin.zlecenie.is_soft_zakonczone"
               :variant="
-                termin.zlecenie.is_umowiono ? 'primary' : 'outline-primary'
+                !termin.zlecenie.is_umowiono || termin.zlecenie.is_dzwonic
+                  ? 'outline-primary'
+                  : 'primary'
               "
             >
               <b-icon icon="cursor-fill" />
@@ -104,13 +123,33 @@
           </div>
           <div class="mt-2">
             <b-button
-              v-if="termin.zlecenie && !termin.zlecenie.is_umowiono"
+              v-if="
+                termin.zlecenie &&
+                ((!termin.zlecenie.is_soft_zakonczone &&
+                  !termin.zlecenie.is_umowiono &&
+                  !termin.zlecenie.is_warsztat) ||
+                  termin.zlecenie.is_dzwonic)
+              "
               variant="success"
             >
               <b-icon icon="telephone-fill" />
             </b-button>
           </div>
         </div>
+      </div>
+      <div v-else>
+        <b-alert variant="info" show>
+          <div>
+            <b-badge variant="info">
+              <b-icon icon="clock-fill" />
+              {{ termin.godzina_rozpoczecia }} -
+              {{ termin.przeznaczony_czas_formatted }}
+            </b-badge>
+          </div>
+          <div class="mt-2">
+            {{ termin.temat }}
+          </div>
+        </b-alert>
       </div>
       <hr />
     </div>
@@ -141,14 +180,6 @@ export default {
     user() {
       return this.$store.state.user.user
     },
-
-    // timetableIds() {
-    //   return (
-    //     this.$store.state.service.timetableIds[
-    //       `${this.timetableUserId}#${this.timetableDate}`
-    //     ] || []
-    //   )
-    // },
   },
 
   watch: {
@@ -159,9 +190,7 @@ export default {
         query: { date },
       })
       this.getTimetableIds()
-      this.$store.dispatch('service/fetchServices', { date }).then(() => {
-        this.getTimetableIds()
-      })
+      this.fetchServices()
     },
   },
 
@@ -195,6 +224,14 @@ export default {
         this.$store.state.service.timetableIds[
           `${this.timetableUserId}#${this.timetableDate}`
         ] || []
+    },
+
+    fetchServices() {
+      this.$store
+        .dispatch('service/fetchServices', { date: this.timetableDate })
+        .then(() => {
+          this.getTimetableIds()
+        })
     },
   },
 }
